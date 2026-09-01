@@ -1,0 +1,284 @@
+<main class="min-h-dvh bg-slate-950 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(34rem,1.1fr)]">
+  <section
+    class="relative hidden overflow-hidden border-r border-white/10 bg-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16"
+    aria-label="Présentation de StockFlow"
+  >
+    <div
+      class="pointer-events-none absolute -top-36 -left-24 size-96 rounded-full bg-teal-400/15 blur-3xl"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none absolute right-0 bottom-0 size-80 rounded-full bg-cyan-400/10 blur-3xl"
+      aria-hidden="true"
+    ></div>
+
+    <a href="/login" class="relative flex w-fit items-center gap-3" aria-label="StockFlow">
+      <span
+        class="grid size-11 place-items-center rounded-2xl bg-teal-400 text-sm font-black tracking-[0.08em] text-slate-950 shadow-lg shadow-teal-950/30"
+        aria-hidden="true"
+      >
+        SF
+      </span>
+      <span>
+        <span class="block text-lg font-bold tracking-tight">StockFlow</span>
+        <span class="block text-xs text-slate-400">Gestion des stocks pour PME</span>
+      </span>
+    </a>
+
+    <div class="relative max-w-xl py-12">
+      <p class="mb-5 text-xs font-bold tracking-[0.18em] text-teal-300 uppercase">
+        Pilotez votre activité
+      </p>
+      <h1 class="text-4xl leading-tight font-bold tracking-tight text-balance xl:text-5xl">
+        Une vision claire de vos stocks, au même endroit.
+      </h1>
+      <p class="mt-6 max-w-lg text-base leading-7 text-slate-300">
+        Centralisez vos produits, fournisseurs et mouvements dans un espace de gestion simple et
+        fiable.
+      </p>
+
+      <ul class="mt-10 grid gap-4 text-sm text-slate-200" aria-label="Fonctionnalités clés">
+        <li class="flex items-center gap-3">
+          <span class="grid size-6 place-items-center rounded-full bg-teal-400/15 text-teal-300">
+            <svg
+              class="size-3.5"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="m5 10 3 3 7-7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          Suivi centralisé et sécurisé
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="grid size-6 place-items-center rounded-full bg-teal-400/15 text-teal-300">
+            <svg
+              class="size-3.5"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="m5 10 3 3 7-7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          Interface responsive pour vos équipes
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="grid size-6 place-items-center rounded-full bg-teal-400/15 text-teal-300">
+            <svg
+              class="size-3.5"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <path d="m5 10 3 3 7-7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          Données métier conservées côté serveur
+        </li>
+      </ul>
+    </div>
+
+    <p class="relative text-xs text-slate-500">© 2026 StockFlow. Interface de gestion.</p>
+  </section>
+
+  <section
+    class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-10 sm:px-8 lg:px-12"
+  >
+    <div class="w-full max-w-md">
+      <div class="mb-10 flex items-center gap-3 lg:hidden">
+        <span
+          class="grid size-10 place-items-center rounded-xl bg-teal-500 text-xs font-black tracking-[0.08em] text-slate-950"
+          aria-hidden="true"
+        >
+          SF
+        </span>
+        <div>
+          <p class="font-bold tracking-tight text-slate-950">StockFlow</p>
+          <p class="text-xs text-slate-500">Gestion des stocks</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-sm font-semibold text-teal-700">Espace sécurisé</p>
+        <h2 class="mt-2 text-3xl font-bold tracking-tight text-slate-950">Bon retour parmi nous</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Connectez-vous avec les identifiants associés à votre compte.
+        </p>
+      </div>
+
+      @if (errorMessage(); as message) {
+        <div
+          class="mt-6 flex gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
+          role="alert"
+          data-testid="login-error"
+        >
+          <svg
+            class="mt-0.5 size-5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7.5v5m0 4h.01" stroke-linecap="round" />
+          </svg>
+          <span>{{ message }}</span>
+        </div>
+      }
+
+      <form class="mt-8 space-y-6" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+        <div>
+          <label for="email" class="mb-2 block text-sm font-semibold text-slate-800">
+            Adresse e-mail
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="nom@entreprise.fr"
+            class="block min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 shadow-xs outline-none placeholder:text-slate-400 focus:border-teal-600 focus:ring-3 focus:ring-teal-600/15"
+            [class.border-red-400]="
+              loginForm.controls.email.invalid && loginForm.controls.email.touched
+            "
+            [attr.aria-invalid]="
+              loginForm.controls.email.invalid && loginForm.controls.email.touched
+            "
+            [attr.aria-describedby]="
+              loginForm.controls.email.invalid && loginForm.controls.email.touched
+                ? 'email-error'
+                : null
+            "
+          />
+          @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
+            <p id="email-error" class="mt-2 text-sm text-red-700">
+              @if (loginForm.controls.email.hasError('required')) {
+                L’adresse e-mail est obligatoire.
+              } @else if (loginForm.controls.email.hasError('email')) {
+                Saisissez une adresse e-mail valide.
+              } @else {
+                L’adresse e-mail ne doit pas dépasser 150 caractères.
+              }
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="password" class="mb-2 block text-sm font-semibold text-slate-800">
+            Mot de passe
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              [type]="isPasswordVisible() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="Votre mot de passe"
+              class="block min-h-12 w-full rounded-xl border border-slate-300 bg-white py-2.5 pr-12 pl-3.5 text-sm text-slate-950 shadow-xs outline-none placeholder:text-slate-400 focus:border-teal-600 focus:ring-3 focus:ring-teal-600/15"
+              [class.border-red-400]="
+                loginForm.controls.password.invalid && loginForm.controls.password.touched
+              "
+              [attr.aria-invalid]="
+                loginForm.controls.password.invalid && loginForm.controls.password.touched
+              "
+              [attr.aria-describedby]="
+                loginForm.controls.password.invalid && loginForm.controls.password.touched
+                  ? 'password-error'
+                  : null
+              "
+            />
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-xl text-slate-500 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-600 focus-visible:outline-none"
+              [attr.aria-label]="
+                isPasswordVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+              "
+              (click)="togglePasswordVisibility()"
+            >
+              @if (isPasswordVisible()) {
+                <svg
+                  class="size-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="m4 4 16 16M10.6 10.7a2 2 0 0 0 2.7 2.7M9.8 5.2A10.5 10.5 0 0 1 12 5c5.5 0 9 7 9 7a17 17 0 0 1-2.2 3.2M6.2 6.2C4.1 7.7 3 10 3 12c0 0 3.5 7 9 7 1.2 0 2.2-.3 3.2-.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              } @else {
+                <svg
+                  class="size-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7Z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
+            <p id="password-error" class="mt-2 text-sm text-red-700">
+              @if (loginForm.controls.password.hasError('required')) {
+                Le mot de passe est obligatoire.
+              } @else {
+                Le mot de passe ne doit pas dépasser 100 caractères.
+              }
+            </p>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 text-sm font-bold text-white shadow-sm shadow-teal-900/15 hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-65"
+          [disabled]="isSubmitting()"
+          data-testid="login-submit"
+        >
+          @if (isSubmitting()) {
+            <svg class="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle
+                class="opacity-30"
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                stroke-width="3"
+              />
+              <path
+                d="M21 12a9 9 0 0 0-9-9"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+            </svg>
+            Connexion en cours…
+          } @else {
+            Se connecter
+          }
+        </button>
+      </form>
+
+      <p class="mt-8 text-center text-xs leading-5 text-slate-500">
+        Vos identifiants sont transmis uniquement à l’API sécurisée StockFlow.
+      </p>
+    </div>
+  </section>
+</main>

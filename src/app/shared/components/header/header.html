@@ -29,10 +29,43 @@
     </div>
   </div>
 
-  <div
-    class="hidden items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 sm:flex"
-  >
-    <span class="size-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
-    Socle frontend
-  </div>
+  @if (currentUser(); as user) {
+    <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div class="hidden min-w-0 text-right sm:block">
+        <p class="truncate text-sm font-semibold text-slate-950">
+          {{ user.fullName || user.email }}
+        </p>
+        <p class="truncate text-xs text-slate-500">{{ roleLabel() }}</p>
+      </div>
+
+      <span
+        class="grid size-9 shrink-0 place-items-center rounded-full bg-teal-100 text-xs font-bold text-teal-800 ring-1 ring-teal-200"
+        aria-hidden="true"
+      >
+        {{ userInitials() }}
+      </span>
+
+      <button
+        type="button"
+        class="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-950 focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 focus-visible:outline-none"
+        aria-label="Se déconnecter"
+        title="Se déconnecter"
+        data-testid="logout-button"
+        (click)="logout()"
+      >
+        <svg
+          class="size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M14 8l4 4-4 4m4-4H9" />
+        </svg>
+      </button>
+    </div>
+  }
 </header>

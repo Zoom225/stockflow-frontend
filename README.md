@@ -35,8 +35,12 @@ npm run build   # build de production dans dist/
 - Tailwind CSS 4 avec PostCSS
 - tests unitaires avec Vitest
 
-L'authentification et les fonctionnalités métier seront ajoutées dans leurs Issues dédiées.
-Aucun endpoint backend ni DTO n'est supposé dans cette initialisation.
+L'authentification JWT utilise le contrat OpenAPI du backend StockFlow. La session est centralisée
+dans `core/auth`, les routes privées sont protégées par des guards et le header `Authorization`
+est ajouté par un interceptor uniquement aux appels API concernés.
+
+Les fonctionnalités métier restent ajoutées progressivement dans leurs Issues dédiées. Aucun
+endpoint backend ni DTO ne doit être supposé sans vérification préalable dans OpenAPI.
 
 ## Architecture cible
 
