@@ -1,0 +1,28 @@
+<main class="welcome">
+  <section class="welcome__card" aria-labelledby="welcome-title">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">SF</span>
+      <span class="brand__name">{{ appName() }}</span>
+    </div>
+
+    <p class="welcome__eyebrow">Gestion de stock pour PME</p>
+    <h1 id="welcome-title">Le socle frontend est prêt.</h1>
+    <p class="welcome__description">
+      Une base Angular moderne, stricte et maintenable pour construire les fonctionnalités de
+      StockFlow étape par étape.
+    </p>
+
+    <ul class="stack" aria-label="Socle technique">
+      <li>Angular 22</li>
+      <li>Standalone</li>
+      <li>TypeScript strict</li>
+    </ul>
+
+    <p class="status" data-testid="app-status">
+      <span class="status__indicator" aria-hidden="true"></span>
+      Initialisation terminée
+    </p>
+  </section>
+</main>
+
+<router-outlet />
