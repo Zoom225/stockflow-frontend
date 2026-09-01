@@ -21,7 +21,7 @@ describe('App', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('.brand__name')?.textContent).toContain('StockFlow');
+    expect(compiled.querySelector('[data-testid="app-name"]')?.textContent).toContain('StockFlow');
     expect(compiled.querySelector('h1')?.textContent).toContain('Le socle frontend est prêt.');
     expect(compiled.querySelector('[data-testid="app-status"]')?.textContent).toContain(
       'Initialisation terminée',

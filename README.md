@@ -32,11 +32,11 @@ npm run build   # build de production dans dist/
 - TypeScript en mode strict
 - composants standalone
 - Angular Router
+- Tailwind CSS 4 avec PostCSS
 - tests unitaires avec Vitest
-- CSS global et styles de composants
 
-Tailwind CSS, l'authentification et les fonctionnalités métier seront ajoutés dans leurs
-Issues dédiées. Aucun endpoint backend ni DTO n'est supposé dans cette initialisation.
+L'authentification et les fonctionnalités métier seront ajoutées dans leurs Issues dédiées.
+Aucun endpoint backend ni DTO n'est supposé dans cette initialisation.
 
 ## Architecture cible
 
