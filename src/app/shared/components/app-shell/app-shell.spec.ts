@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AuthenticatedUser } from '../../../core/auth/auth.models';
+import { AuthService } from '../../../core/auth/auth.service';
 import { AppShell } from './app-shell';
 
 @Component({
@@ -11,11 +13,23 @@ class TestPage {}
 
 describe('AppShell', () => {
   let fixture: ComponentFixture<AppShell>;
+  const currentUser = signal<AuthenticatedUser | null>({
+    userId: 42,
+    fullName: 'Camille Martin',
+    email: 'camille@stockflow.fr',
+    role: 'ROLE_ADMIN',
+  });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppShell],
-      providers: [provideRouter([{ path: '', component: TestPage }])],
+      providers: [
+        provideRouter([{ path: '', component: TestPage }]),
+        {
+          provide: AuthService,
+          useValue: { currentUser: currentUser.asReadonly(), logout: vi.fn() },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppShell);

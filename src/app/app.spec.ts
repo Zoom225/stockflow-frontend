@@ -1,13 +1,34 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { AuthenticatedUser } from './core/auth/auth.models';
+import { AuthService } from './core/auth/auth.service';
 import { App } from './app';
 import { routes } from './app.routes';
 
 describe('App', () => {
+  const currentUser = signal<AuthenticatedUser | null>({
+    userId: 42,
+    fullName: 'Camille Martin',
+    email: 'camille@stockflow.fr',
+    role: 'ROLE_ADMIN',
+  });
+  const isAuthenticated = signal(true);
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(routes)],
+      providers: [
+        provideRouter(routes),
+        {
+          provide: AuthService,
+          useValue: {
+            currentUser: currentUser.asReadonly(),
+            isAuthenticated: isAuthenticated.asReadonly(),
+            logout: vi.fn(),
+          },
+        },
+      ],
     }).compileComponents();
   });
 
