@@ -22,15 +22,20 @@ describe('AppSidebar', () => {
     fixture.detectChanges();
   });
 
-  it('should expose only the dashboard as an active navigation link', () => {
+  it('should expose every stock management route as a navigation link', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const dashboardLink = compiled.querySelector<HTMLAnchorElement>(
-      '[data-testid="dashboard-navigation-link"]',
-    );
-    const disabledItems = compiled.querySelectorAll('[aria-disabled="true"]');
+    const links = Array.from(compiled.querySelectorAll<HTMLAnchorElement>('nav a'));
+    const routes = links.map((link) => link.getAttribute('href'));
 
-    expect(dashboardLink?.getAttribute('href')).toBe('/dashboard');
-    expect(disabledItems).toHaveLength(5);
+    expect(routes).toEqual([
+      '/dashboard',
+      '/products',
+      '/categories',
+      '/suppliers',
+      '/stock-movements',
+      '/alerts',
+    ]);
+    expect(compiled.querySelectorAll('[aria-disabled="true"]')).toHaveLength(0);
   });
 
   it('should notify the shell after selecting a navigation link', () => {

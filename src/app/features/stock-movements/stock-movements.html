@@ -1,0 +1,299 @@
+<section class="space-y-6" aria-labelledby="movements-title">
+  <header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div class="max-w-3xl">
+      <p class="text-xs font-bold tracking-[0.14em] text-teal-700 uppercase">Traçabilité</p>
+      <h1 id="movements-title" class="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+        Mouvements de stock
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-slate-600">
+        Enregistrez les entrées et sorties ; le backend reste la source de vérité du stock.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-55"
+        [disabled]="products().length === 0"
+        (click)="openAction('restock')"
+      >
+        Entrée de stock
+      </button>
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-55"
+        [disabled]="products().length === 0"
+        (click)="openAction('outbound')"
+      >
+        Sortie de stock
+      </button>
+    </div>
+  </header>
+
+  @if (!isLoading() && products().length === 0) {
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span>Ajoutez un produit avant d’enregistrer un mouvement.</span
+      ><a routerLink="/products" class="font-bold underline underline-offset-2"
+        >Accéder aux produits</a
+      >
+    </div>
+  }
+  @if (successMessage(); as message) {
+    <div
+      class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+      role="status"
+    >
+      {{ message }}
+    </div>
+  }
+  @if (errorMessage(); as message) {
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 sm:flex-row sm:items-center sm:justify-between"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      @if (!action()) {
+        <button type="button" class="font-bold underline underline-offset-2" (click)="loadData()">
+          Réessayer
+        </button>
+      }
+    </div>
+  }
+
+  @if (action()) {
+    <article
+      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
+      aria-labelledby="movement-form-title"
+    >
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 id="movement-form-title" class="text-lg font-bold text-slate-950">
+            {{ actionTitle() }}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Une quantité strictement positive est obligatoire.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+          (click)="closeForm()"
+        >
+          Fermer
+        </button>
+      </div>
+      <form
+        class="mt-6 grid gap-5 md:grid-cols-2"
+        [formGroup]="movementForm"
+        (ngSubmit)="submit()"
+        novalidate
+      >
+        <div>
+          <label for="movement-product" class="text-sm font-semibold text-slate-800"
+            >Produit *</label
+          ><select
+            id="movement-product"
+            formControlName="productId"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          >
+            <option [ngValue]="null">Sélectionner un produit</option>
+            @for (product of products(); track product.id) {
+              <option [ngValue]="product.id">
+                {{ product.name }} — {{ product.sku }} (stock : {{ product.quantityInStock }})
+              </option>
+            }
+          </select>
+          @if (movementForm.controls.productId.touched && movementForm.controls.productId.invalid) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">Sélectionnez un produit.</p>
+          }
+        </div>
+        @if (action() === 'edit') {
+          <div>
+            <label for="movement-type" class="text-sm font-semibold text-slate-800">Type *</label
+            ><select
+              id="movement-type"
+              formControlName="type"
+              class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+            >
+              <option value="IN">Entrée</option>
+              <option value="OUT">Sortie</option>
+            </select>
+          </div>
+        }
+        <div>
+          <label for="movement-quantity" class="text-sm font-semibold text-slate-800"
+            >Quantité *</label
+          ><input
+            id="movement-quantity"
+            type="number"
+            formControlName="quantity"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (movementForm.controls.quantity.touched && movementForm.controls.quantity.invalid) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">
+              La quantité doit être supérieure à 0.
+            </p>
+          }
+          @if (selectedProduct(); as product) {
+            <p class="mt-1.5 text-xs text-slate-500">
+              Stock actuel : {{ product.quantityInStock }} unité(s).
+            </p>
+          }
+        </div>
+        <div>
+          <label for="movement-date" class="text-sm font-semibold text-slate-800"
+            >Date du mouvement</label
+          ><input
+            id="movement-date"
+            type="datetime-local"
+            formControlName="movementDate"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          <p class="mt-1.5 text-xs text-slate-500">
+            Laissez vide pour utiliser la date du serveur.
+          </p>
+        </div>
+        <div class="md:col-span-2">
+          <label for="movement-reason" class="text-sm font-semibold text-slate-800">Motif</label
+          ><textarea
+            id="movement-reason"
+            formControlName="reason"
+            maxlength="255"
+            rows="3"
+            placeholder="Ex. Livraison fournisseur, commande client…"
+            class="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          ></textarea>
+        </div>
+        <div class="flex flex-col-reverse gap-3 md:col-span-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            class="min-h-11 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            (click)="closeForm()"
+          >
+            Annuler</button
+          ><button
+            type="submit"
+            class="min-h-11 rounded-xl bg-teal-700 px-5 py-2 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="isSubmitting()"
+          >
+            {{
+              isSubmitting()
+                ? 'Enregistrement…'
+                : action() === 'edit'
+                  ? 'Enregistrer les modifications'
+                  : 'Valider le mouvement'
+            }}
+          </button>
+        </div>
+      </form>
+    </article>
+  }
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
+    <label for="movement-filter" class="text-sm font-semibold text-slate-800"
+      >Filtrer par produit</label
+    ><select
+      id="movement-filter"
+      class="mt-2 min-h-11 w-full max-w-md rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+      (change)="updateProductFilter($event)"
+    >
+      <option value="">Tous les produits</option>
+      @for (product of products(); track product.id) {
+        <option [value]="product.id">{{ product.name }} — {{ product.sku }}</option>
+      }
+    </select>
+  </div>
+
+  <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+    @if (isLoading()) {
+      <div class="grid min-h-64 place-items-center px-6 py-12" role="status">
+        <div class="text-center">
+          <span
+            class="mx-auto block size-8 animate-spin rounded-full border-3 border-slate-200 border-t-teal-700"
+            aria-hidden="true"
+          ></span>
+          <p class="mt-3 text-sm font-medium text-slate-600">Chargement de l’historique…</p>
+        </div>
+      </div>
+    } @else if (displayedMovements().length === 0) {
+      <div class="px-6 py-14 text-center">
+        <h2 class="text-lg font-bold text-slate-950">Aucun mouvement de stock</h2>
+        <p class="mt-2 text-sm text-slate-600">
+          Les entrées et sorties enregistrées apparaîtront ici.
+        </p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-4xl text-left text-sm">
+          <thead
+            class="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-500 uppercase"
+          >
+            <tr>
+              <th class="px-5 py-3.5 font-bold sm:px-6">Date</th>
+              <th class="px-5 py-3.5 font-bold">Produit</th>
+              <th class="px-5 py-3.5 font-bold">Type</th>
+              <th class="px-5 py-3.5 font-bold">Quantité</th>
+              <th class="px-5 py-3.5 font-bold">Motif</th>
+              <th class="px-5 py-3.5 text-right font-bold sm:px-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (movement of displayedMovements(); track movement.id) {
+              <tr class="hover:bg-slate-50/70">
+                <td class="whitespace-nowrap px-5 py-4 text-slate-600 sm:px-6">
+                  {{ movement.movementDate | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="px-5 py-4">
+                  <div class="font-bold text-slate-950">{{ movement.productName }}</div>
+                  <div class="mt-1 font-mono text-xs text-slate-500">{{ movement.productSku }}</div>
+                </td>
+                <td class="px-5 py-4">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-bold"
+                    [class.bg-emerald-100]="movement.type === 'IN'"
+                    [class.text-emerald-800]="movement.type === 'IN'"
+                    [class.bg-slate-200]="movement.type === 'OUT'"
+                    [class.text-slate-800]="movement.type === 'OUT'"
+                    >{{ movement.type === 'IN' ? 'Entrée' : 'Sortie' }}</span
+                  >
+                </td>
+                <td
+                  class="px-5 py-4 text-base font-black"
+                  [class.text-emerald-700]="movement.type === 'IN'"
+                  [class.text-slate-900]="movement.type === 'OUT'"
+                >
+                  {{ movement.type === 'IN' ? '+' : '−' }}{{ movement.quantity }}
+                </td>
+                <td class="max-w-xs px-5 py-4 text-slate-600">
+                  {{ movement.reason || 'Aucun motif' }}
+                </td>
+                <td class="px-5 py-4 sm:px-6">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      class="rounded-lg px-3 py-2 font-bold text-teal-700 hover:bg-teal-50"
+                      (click)="openEditForm(movement)"
+                    >
+                      Modifier</button
+                    ><button
+                      type="button"
+                      class="rounded-lg px-3 py-2 font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+                      [disabled]="deletingId() === movement.id"
+                      (click)="deleteMovement(movement)"
+                    >
+                      {{ deletingId() === movement.id ? 'Suppression…' : 'Supprimer' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</section>

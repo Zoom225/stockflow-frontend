@@ -1,0 +1,190 @@
+<section class="space-y-6" aria-labelledby="categories-title">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="max-w-3xl">
+      <p class="text-xs font-bold tracking-[0.14em] text-teal-700 uppercase">Catalogue</p>
+      <h1 id="categories-title" class="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+        Catégories
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-slate-600">
+        Organisez les produits dans des catégories claires et faciles à retrouver.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-teal-800 focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 focus-visible:outline-none"
+      (click)="openCreateForm()"
+    >
+      <span aria-hidden="true">+</span>
+      Ajouter une catégorie
+    </button>
+  </header>
+
+  @if (successMessage(); as message) {
+    <div
+      class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+      role="status"
+    >
+      {{ message }}
+    </div>
+  }
+  @if (errorMessage(); as message) {
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 sm:flex-row sm:items-center sm:justify-between"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      @if (!formOpen()) {
+        <button
+          type="button"
+          class="font-bold underline underline-offset-2"
+          (click)="loadCategories()"
+        >
+          Réessayer
+        </button>
+      }
+    </div>
+  }
+
+  @if (formOpen()) {
+    <article
+      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
+      aria-labelledby="category-form-title"
+    >
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 id="category-form-title" class="text-lg font-bold text-slate-950">
+            {{ editingId() ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Les champs marqués d’un astérisque sont obligatoires.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+          (click)="closeForm()"
+        >
+          Fermer
+        </button>
+      </div>
+
+      <form class="mt-6 grid gap-5" [formGroup]="categoryForm" (ngSubmit)="submit()" novalidate>
+        <div>
+          <label for="category-name" class="text-sm font-semibold text-slate-800">Nom *</label>
+          <input
+            id="category-name"
+            type="text"
+            formControlName="name"
+            maxlength="100"
+            autocomplete="off"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (
+            categoryForm.controls.name.touched && categoryForm.controls.name.hasError('required')
+          ) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">Le nom est obligatoire.</p>
+          }
+        </div>
+
+        <div>
+          <label for="category-description" class="text-sm font-semibold text-slate-800"
+            >Description</label
+          >
+          <textarea
+            id="category-description"
+            formControlName="description"
+            maxlength="255"
+            rows="3"
+            class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          ></textarea>
+          <p class="mt-1 text-right text-xs text-slate-400">
+            {{ categoryForm.controls.description.value.length }}/255
+          </p>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            class="min-h-11 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            (click)="closeForm()"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            class="min-h-11 rounded-xl bg-teal-700 px-5 py-2 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="isSubmitting()"
+          >
+            {{
+              isSubmitting()
+                ? 'Enregistrement…'
+                : editingId()
+                  ? 'Enregistrer les modifications'
+                  : 'Créer la catégorie'
+            }}
+          </button>
+        </div>
+      </form>
+    </article>
+  }
+
+  <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+    @if (isLoading()) {
+      <div class="grid min-h-56 place-items-center px-6 py-12" role="status">
+        <div class="text-center">
+          <span
+            class="mx-auto block size-8 animate-spin rounded-full border-3 border-slate-200 border-t-teal-700"
+            aria-hidden="true"
+          ></span>
+          <p class="mt-3 text-sm font-medium text-slate-600">Chargement des catégories…</p>
+        </div>
+      </div>
+    } @else if (categories().length === 0) {
+      <div class="px-6 py-14 text-center">
+        <h2 class="text-lg font-bold text-slate-950">Aucune catégorie</h2>
+        <p class="mt-2 text-sm text-slate-600">
+          Créez une première catégorie avant d’ajouter vos produits.
+        </p>
+        <button
+          type="button"
+          class="mt-5 text-sm font-bold text-teal-700 hover:text-teal-900"
+          (click)="openCreateForm()"
+        >
+          Ajouter une catégorie
+        </button>
+      </div>
+    } @else {
+      <div class="divide-y divide-slate-100">
+        @for (category of categories(); track category.id) {
+          <div
+            class="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+          >
+            <div class="min-w-0">
+              <h2 class="font-bold text-slate-950">{{ category.name }}</h2>
+              <p class="mt-1 text-sm leading-6 text-slate-600">
+                {{ category.description || 'Aucune description renseignée.' }}
+              </p>
+            </div>
+            <div class="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                class="rounded-lg px-3 py-2 text-sm font-bold text-teal-700 hover:bg-teal-50"
+                (click)="openEditForm(category)"
+              >
+                Modifier
+              </button>
+              <button
+                type="button"
+                class="rounded-lg px-3 py-2 text-sm font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+                [disabled]="deletingId() === category.id"
+                (click)="deleteCategory(category)"
+              >
+                {{ deletingId() === category.id ? 'Suppression…' : 'Supprimer' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </article>
+</section>

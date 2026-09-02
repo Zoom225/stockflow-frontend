@@ -29,50 +29,28 @@
     <ul class="space-y-1">
       @for (item of navigationItems; track item.label) {
         <li>
-          @if (item.route; as route) {
-            <a
-              [routerLink]="route"
-              routerLinkActive="bg-teal-500/15 text-teal-200"
-              [routerLinkActiveOptions]="{ exact: true }"
-              class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
-              data-testid="dashboard-navigation-link"
-              (click)="navigationSelected.emit()"
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-teal-500/15 text-teal-200"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:outline-none"
+            [attr.data-testid]="item.testId"
+            (click)="navigationSelected.emit()"
+          >
+            <svg
+              class="size-5 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
             >
-              <svg
-                class="size-5 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path [attr.d]="item.iconPath" />
-              </svg>
-              {{ item.label }}
-            </a>
-          } @else {
-            <span
-              class="flex min-h-11 cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500"
-              aria-disabled="true"
-            >
-              <svg
-                class="size-5 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path [attr.d]="item.iconPath" />
-              </svg>
-              {{ item.label }}
-              <span class="sr-only">— bientôt disponible</span>
-            </span>
-          }
+              <path [attr.d]="item.iconPath" />
+            </svg>
+            {{ item.label }}
+          </a>
         </li>
       }
     </ul>

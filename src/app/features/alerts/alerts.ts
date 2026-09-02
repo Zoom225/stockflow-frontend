@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,60 +8,55 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
-import { DashboardApiService } from '../../core/services/dashboard-api.service';
+import { finalize } from 'rxjs';
 import { ProductsApiService } from '../../core/services/products-api.service';
 import { StockDataRefreshService } from '../../core/services/stock-data-refresh.service';
-import { DashboardSummaryResponse } from '../../shared/models/dashboard.models';
 import { ProductResponse } from '../../shared/models/product.models';
 import { getApiErrorMessage } from '../../shared/utils/api-error-message';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-alerts',
   standalone: true,
-  imports: [DatePipe, RouterLink],
-  templateUrl: './dashboard.html',
+  imports: [RouterLink],
+  templateUrl: './alerts.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Dashboard {
-  private readonly dashboardApi = inject(DashboardApiService);
+export class Alerts {
   private readonly productsApi = inject(ProductsApiService);
   private readonly refreshService = inject(StockDataRefreshService);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly summary = signal<DashboardSummaryResponse | null>(null);
-  protected readonly lowStockProducts = signal<readonly ProductResponse[]>([]);
+  protected readonly products = signal<readonly ProductResponse[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 
   constructor() {
     effect(() => {
       this.refreshService.revision();
-      this.loadDashboard();
+      this.loadAlerts();
     });
   }
 
-  protected loadDashboard(): void {
+  protected loadAlerts(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    forkJoin({
-      summary: this.dashboardApi.getSummary(),
-      lowStockProducts: this.productsApi.getLowStock(),
-    })
+    this.productsApi
+      .getLowStock()
       .pipe(
         finalize(() => this.isLoading.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({ summary, lowStockProducts }) => {
-          this.summary.set(summary);
-          this.lowStockProducts.set(lowStockProducts);
-        },
+        next: (products) => this.products.set(products),
         error: (error: unknown) =>
           this.errorMessage.set(
-            getApiErrorMessage(error, 'Impossible de charger le tableau de bord.'),
+            getApiErrorMessage(error, 'Impossible de charger les alertes de stock.'),
           ),
       });
+  }
+
+  protected alertLevel(product: ProductResponse): string {
+    return product.quantityInStock === 0 ? 'Rupture de stock' : 'Sous le seuil minimum';
   }
 }
