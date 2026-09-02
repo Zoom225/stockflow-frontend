@@ -114,6 +114,38 @@
         </p>
       </div>
 
+      <div
+        class="mt-6 flex gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3.5"
+        role="note"
+        aria-labelledby="demo-account-title"
+        data-testid="demo-account-notice"
+      >
+        <span
+          class="grid size-9 shrink-0 place-items-center rounded-lg bg-teal-100 text-teal-700"
+          aria-hidden="true"
+        >
+          <svg
+            class="size-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5m0-8h.01" stroke-linecap="round" />
+          </svg>
+        </span>
+        <div>
+          <p id="demo-account-title" class="text-sm font-bold text-teal-950">
+            Compte de démonstration
+          </p>
+          <p class="mt-1 text-sm leading-5 text-teal-800">
+            Les identifiants sont préremplis. Cliquez simplement sur « Se connecter » pour tester
+            StockFlow.
+          </p>
+        </div>
+      </div>
+
       @if (errorMessage(); as message) {
         <div
           class="mt-6 flex gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800"
