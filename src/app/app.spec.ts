@@ -1,8 +1,11 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { of } from 'rxjs';
 import { AuthenticatedUser } from './core/auth/auth.models';
 import { AuthService } from './core/auth/auth.service';
+import { DashboardApiService } from './core/services/dashboard-api.service';
+import { ProductsApiService } from './core/services/products-api.service';
 import { App } from './app';
 import { routes } from './app.routes';
 
@@ -28,6 +31,21 @@ describe('App', () => {
             logout: vi.fn(),
           },
         },
+        {
+          provide: DashboardApiService,
+          useValue: {
+            getSummary: () =>
+              of({
+                totalProducts: 0,
+                totalCategories: 0,
+                totalSuppliers: 0,
+                lowStockProducts: 0,
+                totalStockQuantity: 0,
+                recentStockMovements: [],
+              }),
+          },
+        },
+        { provide: ProductsApiService, useValue: { getLowStock: () => of([]) } },
       ],
     }).compileComponents();
   });
@@ -50,6 +68,6 @@ describe('App', () => {
 
     expect(compiled.querySelector('app-shell')).toBeTruthy();
     expect(compiled.querySelector('app-sidebar')).toBeTruthy();
-    expect(compiled.querySelector('h1')?.textContent).toContain('Bienvenue dans StockFlow');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Tableau de bord');
   });
 });

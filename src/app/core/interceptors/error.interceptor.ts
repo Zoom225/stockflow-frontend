@@ -5,6 +5,7 @@ import { catchError, throwError } from 'rxjs';
 import { API_ENDPOINT_PREFIX, AUTH_LOGIN_ENDPOINT } from '../auth/auth.constants';
 import { AuthService } from '../auth/auth.service';
 import { ApiError } from '../services/api-error';
+import { ApiErrorResponse } from '../../shared/models/api-error-response.model';
 
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const authService = inject(AuthService);
@@ -27,14 +28,20 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
       }
 
       return throwError(
-        () => new ApiError(error.status, getErrorMessage(error.status, request.url)),
+        () =>
+          new ApiError(
+            error.status,
+            getErrorMessage(error.status, request.url, error.error),
+            getFieldErrors(error.error),
+          ),
       );
     }),
   );
 };
 
-function getErrorMessage(status: number, requestUrl: string): string {
+function getErrorMessage(status: number, requestUrl: string, responseBody: unknown): string {
   const isLoginRequest = requestUrl === AUTH_LOGIN_ENDPOINT;
+  const backendMessage = getBackendMessage(responseBody);
 
   switch (status) {
     case 0:
@@ -42,7 +49,7 @@ function getErrorMessage(status: number, requestUrl: string): string {
     case 400:
       return isLoginRequest
         ? 'Les informations de connexion sont invalides.'
-        : 'Les informations envoyées sont invalides.';
+        : (backendMessage ?? 'Les informations envoyées sont invalides.');
     case 401:
       return isLoginRequest
         ? 'Adresse e-mail ou mot de passe incorrect.'
@@ -50,14 +57,39 @@ function getErrorMessage(status: number, requestUrl: string): string {
     case 403:
       return "Vous n'avez pas les droits nécessaires pour cette action.";
     case 404:
-      return 'La ressource demandée est introuvable.';
+      return backendMessage ?? 'La ressource demandée est introuvable.';
     case 409:
-      return 'Cette action entre en conflit avec des données existantes.';
+      return backendMessage ?? 'Cette action entre en conflit avec des données existantes.';
     case 422:
-      return 'Certaines informations fournies ne peuvent pas être traitées.';
+      return backendMessage ?? 'Certaines informations fournies ne peuvent pas être traitées.';
     default:
       return status >= 500
         ? 'Une erreur interne est survenue. Réessayez ultérieurement.'
         : "Une erreur inattendue empêche l'opération.";
   }
+}
+
+function getBackendMessage(responseBody: unknown): string | null {
+  if (!isApiErrorResponse(responseBody)) {
+    return null;
+  }
+
+  const message = responseBody.message.trim();
+  return message.length > 0 ? message : null;
+}
+
+function getFieldErrors(responseBody: unknown): Readonly<Record<string, string>> {
+  if (!isApiErrorResponse(responseBody) || !responseBody.fieldErrors) {
+    return {};
+  }
+
+  return responseBody.fieldErrors;
+}
+
+function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  return 'message' in value && typeof value.message === 'string';
 }

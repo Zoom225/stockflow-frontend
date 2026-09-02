@@ -74,4 +74,29 @@ describe('errorInterceptor', () => {
     expect((receivedError as ApiError).status).toBe(500);
     expect((receivedError as ApiError).message).toContain('erreur interne');
   });
+
+  it('should expose the safe business message returned by the API', () => {
+    const endpoint = `${environment.apiUrl}/api/stock-movements/products/12/outbound`;
+    let receivedError: unknown;
+    http.post(endpoint, { quantity: 20 }).subscribe({
+      error: (error: unknown) => (receivedError = error),
+    });
+
+    httpTesting.expectOne(endpoint).flush(
+      {
+        message: 'Stock insuffisant pour le produit avec l’identifiant : 12',
+        fieldErrors: { quantity: 'La quantité demandée dépasse le stock disponible' },
+        stackTrace: 'never exposed',
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect((receivedError as ApiError).message).toBe(
+      'Stock insuffisant pour le produit avec l’identifiant : 12',
+    );
+    expect((receivedError as ApiError).fieldErrors).toEqual({
+      quantity: 'La quantité demandée dépasse le stock disponible',
+    });
+    expect((receivedError as ApiError).message).not.toContain('never exposed');
+  });
 });

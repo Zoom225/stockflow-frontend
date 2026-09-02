@@ -1,0 +1,368 @@
+<section class="space-y-6" aria-labelledby="products-title">
+  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div class="max-w-3xl">
+      <p class="text-xs font-bold tracking-[0.14em] text-teal-700 uppercase">Catalogue</p>
+      <h1 id="products-title" class="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+        Produits
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-slate-600">
+        Gérez les références, les prix et les seuils d’alerte de votre catalogue.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-55"
+      [disabled]="categories().length === 0"
+      [title]="categories().length === 0 ? 'Créez d’abord une catégorie' : 'Ajouter un produit'"
+      (click)="openCreateForm()"
+    >
+      <span aria-hidden="true">+</span> Ajouter un produit
+    </button>
+  </header>
+
+  @if (!isLoading() && categories().length === 0) {
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span>Une catégorie est nécessaire avant de créer le premier produit.</span>
+      <a routerLink="/categories" class="font-bold underline underline-offset-2"
+        >Créer une catégorie</a
+      >
+    </div>
+  }
+  @if (successMessage(); as message) {
+    <div
+      class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+      role="status"
+    >
+      {{ message }}
+    </div>
+  }
+  @if (errorMessage(); as message) {
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 sm:flex-row sm:items-center sm:justify-between"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      @if (!formOpen()) {
+        <button type="button" class="font-bold underline underline-offset-2" (click)="loadPage()">
+          Réessayer
+        </button>
+      }
+    </div>
+  }
+
+  @if (formOpen()) {
+    <article
+      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6"
+      aria-labelledby="product-form-title"
+    >
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 id="product-form-title" class="text-lg font-bold text-slate-950">
+            {{ editingId() ? 'Modifier le produit' : 'Nouveau produit' }}
+          </h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Le stock courant est géré exclusivement depuis les mouvements de stock.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+          (click)="closeForm()"
+        >
+          Fermer
+        </button>
+      </div>
+      <form
+        class="mt-6 grid gap-5 md:grid-cols-2"
+        [formGroup]="productForm"
+        (ngSubmit)="submit()"
+        novalidate
+      >
+        <div>
+          <label for="product-sku" class="text-sm font-semibold text-slate-800">SKU *</label
+          ><input
+            id="product-sku"
+            type="text"
+            formControlName="sku"
+            maxlength="50"
+            autocomplete="off"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm uppercase outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (productForm.controls.sku.touched && productForm.controls.sku.invalid) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">
+              Le SKU est obligatoire (50 caractères maximum).
+            </p>
+          }
+        </div>
+        <div>
+          <label for="product-name" class="text-sm font-semibold text-slate-800">Nom *</label
+          ><input
+            id="product-name"
+            type="text"
+            formControlName="name"
+            maxlength="150"
+            autocomplete="off"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (productForm.controls.name.touched && productForm.controls.name.invalid) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">Le nom est obligatoire.</p>
+          }
+        </div>
+        <div class="md:col-span-2">
+          <label for="product-description" class="text-sm font-semibold text-slate-800"
+            >Description</label
+          ><textarea
+            id="product-description"
+            formControlName="description"
+            maxlength="255"
+            rows="3"
+            class="mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          ></textarea>
+        </div>
+        <div>
+          <label for="product-purchase-price" class="text-sm font-semibold text-slate-800"
+            >Prix d’achat (€) *</label
+          ><input
+            id="product-purchase-price"
+            type="number"
+            formControlName="purchasePrice"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (
+            productForm.controls.purchasePrice.touched && productForm.controls.purchasePrice.invalid
+          ) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">
+              Saisissez un prix supérieur ou égal à 0.
+            </p>
+          }
+        </div>
+        <div>
+          <label for="product-selling-price" class="text-sm font-semibold text-slate-800"
+            >Prix de vente (€) *</label
+          ><input
+            id="product-selling-price"
+            type="number"
+            formControlName="sellingPrice"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (
+            productForm.controls.sellingPrice.touched && productForm.controls.sellingPrice.invalid
+          ) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">
+              Saisissez un prix supérieur ou égal à 0.
+            </p>
+          }
+        </div>
+        <div>
+          <label for="product-category" class="text-sm font-semibold text-slate-800"
+            >Catégorie *</label
+          ><select
+            id="product-category"
+            formControlName="categoryId"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          >
+            <option [ngValue]="null">Sélectionner une catégorie</option>
+            @for (category of categories(); track category.id) {
+              <option [ngValue]="category.id">{{ category.name }}</option>
+            }
+          </select>
+          @if (productForm.controls.categoryId.touched && productForm.controls.categoryId.invalid) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">La catégorie est obligatoire.</p>
+          }
+        </div>
+        <div>
+          <label for="product-supplier" class="text-sm font-semibold text-slate-800"
+            >Fournisseur</label
+          ><select
+            id="product-supplier"
+            formControlName="supplierId"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          >
+            <option [ngValue]="null">Aucun fournisseur</option>
+            @for (supplier of suppliers(); track supplier.id) {
+              <option [ngValue]="supplier.id">{{ supplier.name }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="product-minimum-stock" class="text-sm font-semibold text-slate-800"
+            >Seuil minimum *</label
+          ><input
+            id="product-minimum-stock"
+            type="number"
+            formControlName="minimumStock"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            class="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+          />
+          @if (
+            productForm.controls.minimumStock.touched && productForm.controls.minimumStock.invalid
+          ) {
+            <p class="mt-1.5 text-xs font-medium text-rose-700">
+              Le seuil doit être supérieur ou égal à 0.
+            </p>
+          }
+        </div>
+        <div class="flex items-end">
+          <p class="rounded-xl bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+            Un nouveau produit commence à 0 unité. Utilisez ensuite une entrée de stock.
+          </p>
+        </div>
+        <div class="flex flex-col-reverse gap-3 md:col-span-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            class="min-h-11 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            (click)="closeForm()"
+          >
+            Annuler</button
+          ><button
+            type="submit"
+            class="min-h-11 rounded-xl bg-teal-700 px-5 py-2 text-sm font-bold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+            [disabled]="isSubmitting()"
+          >
+            {{
+              isSubmitting()
+                ? 'Enregistrement…'
+                : editingId()
+                  ? 'Enregistrer les modifications'
+                  : 'Créer le produit'
+            }}
+          </button>
+        </div>
+      </form>
+    </article>
+  }
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
+    <label for="product-search" class="sr-only">Rechercher un produit</label>
+    <div class="relative max-w-xl">
+      <svg
+        class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-slate-400"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" /></svg
+      ><input
+        id="product-search"
+        type="search"
+        class="min-h-11 w-full rounded-xl border border-slate-300 py-2 pr-3.5 pl-11 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15"
+        placeholder="Rechercher par nom, SKU, catégorie ou fournisseur"
+        [value]="searchTerm()"
+        (input)="updateSearch($event)"
+      />
+    </div>
+  </div>
+
+  <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+    @if (isLoading()) {
+      <div class="grid min-h-64 place-items-center px-6 py-12" role="status">
+        <div class="text-center">
+          <span
+            class="mx-auto block size-8 animate-spin rounded-full border-3 border-slate-200 border-t-teal-700"
+            aria-hidden="true"
+          ></span>
+          <p class="mt-3 text-sm font-medium text-slate-600">Chargement des produits…</p>
+        </div>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="px-6 py-14 text-center">
+        <h2 class="text-lg font-bold text-slate-950">Aucun produit</h2>
+        <p class="mt-2 text-sm text-slate-600">
+          Ajoutez votre première référence pour commencer à gérer le stock.
+        </p>
+      </div>
+    } @else if (filteredProducts().length === 0) {
+      <div class="px-6 py-14 text-center">
+        <h2 class="text-lg font-bold text-slate-950">Aucun résultat</h2>
+        <p class="mt-2 text-sm text-slate-600">
+          Aucun produit ne correspond à « {{ searchTerm() }} ».
+        </p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-5xl text-left text-sm">
+          <thead
+            class="border-b border-slate-200 bg-slate-50 text-xs tracking-wide text-slate-500 uppercase"
+          >
+            <tr>
+              <th class="px-5 py-3.5 font-bold sm:px-6">Produit</th>
+              <th class="px-5 py-3.5 font-bold">Catégorie / fournisseur</th>
+              <th class="px-5 py-3.5 font-bold">Prix</th>
+              <th class="px-5 py-3.5 font-bold">Stock</th>
+              <th class="px-5 py-3.5 text-right font-bold sm:px-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (product of filteredProducts(); track product.id) {
+              <tr class="align-middle hover:bg-slate-50/70">
+                <td class="px-5 py-4 sm:px-6">
+                  <div class="font-bold text-slate-950">{{ product.name }}</div>
+                  <div class="mt-1 font-mono text-xs text-slate-500">{{ product.sku }}</div>
+                </td>
+                <td class="px-5 py-4">
+                  <div class="font-medium text-slate-700">{{ product.categoryName }}</div>
+                  <div class="mt-1 text-xs text-slate-500">
+                    {{ product.supplierName || 'Sans fournisseur' }}
+                  </div>
+                </td>
+                <td class="px-5 py-4">
+                  <div class="text-slate-700">
+                    Vente : {{ product.sellingPrice | currency: 'EUR' : 'symbol' : '1.2-2' }}
+                  </div>
+                  <div class="mt-1 text-xs text-slate-500">
+                    Achat : {{ product.purchasePrice | currency: 'EUR' : 'symbol' : '1.2-2' }}
+                  </div>
+                </td>
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-black text-slate-950">{{
+                      product.quantityInStock
+                    }}</span>
+                    @if (product.lowStock) {
+                      <span
+                        class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800"
+                        >Stock faible</span
+                      >
+                    }
+                  </div>
+                  <div class="mt-1 text-xs text-slate-500">Seuil : {{ product.minimumStock }}</div>
+                </td>
+                <td class="px-5 py-4 sm:px-6">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      class="rounded-lg px-3 py-2 font-bold text-teal-700 hover:bg-teal-50"
+                      (click)="openEditForm(product)"
+                    >
+                      Modifier</button
+                    ><button
+                      type="button"
+                      class="rounded-lg px-3 py-2 font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50"
+                      [disabled]="deletingId() === product.id"
+                      (click)="deleteProduct(product)"
+                    >
+                      {{ deletingId() === product.id ? 'Suppression…' : 'Supprimer' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</section>
