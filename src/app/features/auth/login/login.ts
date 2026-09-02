@@ -24,8 +24,11 @@ export class Login {
   protected readonly isPasswordVisible = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly loginForm = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
-    password: ['', [Validators.required, Validators.maxLength(100)]],
+    email: [
+      'demo@stockflow.app',
+      [Validators.required, Validators.email, Validators.maxLength(150)],
+    ],
+    password: ['DemoStock2026!', [Validators.required, Validators.maxLength(100)]],
   });
 
   protected submit(): void {
