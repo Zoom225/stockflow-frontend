@@ -12,7 +12,7 @@
       aria-hidden="true"
     ></div>
 
-    <a href="/login" class="relative flex w-fit items-center gap-3" aria-label="StockFlow">
+    <a href="/" class="relative flex w-fit items-center gap-3" aria-label="Accueil StockFlow">
       <span
         class="grid size-11 place-items-center rounded-2xl bg-teal-400 text-sm font-black tracking-[0.08em] text-slate-950 shadow-lg shadow-teal-950/30"
         aria-hidden="true"
@@ -93,7 +93,11 @@
     class="flex min-h-dvh items-center justify-center bg-slate-50 px-4 py-10 sm:px-8 lg:px-12"
   >
     <div class="w-full max-w-md">
-      <div class="mb-10 flex items-center gap-3 lg:hidden">
+      <a
+        href="/"
+        class="mb-10 flex w-fit items-center gap-3 lg:hidden"
+        aria-label="Accueil StockFlow"
+      >
         <span
           class="grid size-10 place-items-center rounded-xl bg-teal-500 text-xs font-black tracking-[0.08em] text-slate-950"
           aria-hidden="true"
@@ -104,7 +108,7 @@
           <p class="font-bold tracking-tight text-slate-950">StockFlow</p>
           <p class="text-xs text-slate-500">Gestion des stocks</p>
         </div>
-      </div>
+      </a>
 
       <div>
         <p class="text-sm font-semibold text-teal-700">Espace sécurisé</p>
@@ -141,7 +145,8 @@
           </p>
           <p class="mt-1 text-sm leading-5 text-teal-800">
             Les identifiants sont préremplis. Cliquez simplement sur « Se connecter » pour tester
-            StockFlow.
+            StockFlow. Le premier chargement peut prendre une à deux minutes lorsque le serveur de
+            démonstration sort de veille.
           </p>
         </div>
       </div>

@@ -3,6 +3,12 @@ import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    title: 'StockFlow | Gestion de stock pour PME',
+    loadComponent: () => import('./features/home/home').then(({ Home }) => Home),
+  },
+  {
     path: 'login',
     title: 'Connexion | StockFlow',
     loadComponent: () => import('./features/auth/login/login').then(({ Login }) => Login),
@@ -14,11 +20,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./shared/components/app-shell/app-shell').then(({ AppShell }) => AppShell),
     children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'dashboard',
-      },
       {
         path: 'dashboard',
         title: 'Tableau de bord | StockFlow',
@@ -60,6 +61,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '',
   },
 ];

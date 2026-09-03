@@ -19,6 +19,8 @@ describe('App', () => {
   const isAuthenticated = signal(true);
 
   beforeEach(async () => {
+    isAuthenticated.set(true);
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
@@ -53,6 +55,24 @@ describe('App', () => {
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should render the public home at the root URL without authentication', async () => {
+    isAuthenticated.set(false);
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+
+    fixture.detectChanges();
+    await router.navigateByUrl('/');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(router.url).toBe('/');
+    expect(compiled.querySelector('app-home')).toBeTruthy();
+    expect(compiled.querySelector('app-login')).toBeFalsy();
+    expect(compiled.querySelector('h1')?.textContent).toContain('Votre stock devient clair');
   });
 
   it('should render the application shell on the dashboard route', async () => {
